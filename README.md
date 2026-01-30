@@ -50,43 +50,48 @@ dto          →  Request & response payloads
 ```
 
 
+---
+
+## 📂 Project Structure
+
+```text
 video-rental-system/
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/ilu55/videorental/
 │   │   │       ├── config/
-│   │   │       │   ├── SecurityConfig.java       # Security & Filter configuration
-│   │   │       │   └── SwaggerConfig.java        # Swagger UI customization
+│   │   │       │   ├── SecurityConfig.java
+│   │   │       │   └── SwaggerConfig.java
 │   │   │       ├── controller/
-│   │   │       │   ├── AuthController.java       # Login & Register endpoints
-│   │   │       │   └── VideoController.java      # Video CRUD & Rental endpoints
+│   │   │       │   ├── AuthController.java
+│   │   │       │   └── VideoController.java
 │   │   │       ├── dto/
-│   │   │       │   ├── UserLoginDto.java         # Request body for Login
-│   │   │       │   └── UserRegistrationDto.java  # Request body for Register
+│   │   │       │   ├── UserLoginDto.java
+│   │   │       │   └── UserRegistrationDto.java
 │   │   │       ├── entity/
-│   │   │       │   ├── User.java                 # MySQL 'users' table
-│   │   │       │   ├── Video.java                # MySQL 'videos' table
-│   │   │       │   └── Rental.java               # MySQL 'rentals' table
+│   │   │       │   ├── User.java
+│   │   │       │   ├── Video.java
+│   │   │       │   └── Rental.java
 │   │   │       ├── exception/
-│   │   │       │   └── GlobalExceptionHandler.java # Error JSON responses
+│   │   │       │   └── GlobalExceptionHandler.java
 │   │   │       ├── repository/
-│   │   │       │   ├── UserRepository.java       # Database logic for Users
-│   │   │       │   ├── VideoRepository.java      # Database logic for Videos
-│   │   │       │   └── RentalRepository.java     # Database logic for Rentals
+│   │   │       │   ├── UserRepository.java
+│   │   │       │   ├── VideoRepository.java
+│   │   │       │   └── RentalRepository.java
 │   │   │       ├── security/
-│   │   │       │   ├── JwtAuthFilter.java        # Token validation filter
-│   │   │       │   └── JwtService.java           # Token creation/parsing logic
+│   │   │       │   ├── JwtAuthFilter.java
+│   │   │       │   └── JwtService.java
 │   │   │       ├── service/
-│   │   │       │   ├── UserService.java          # Registration business logic
-│   │   │       │   ├── RentalService.java        # 2-video limit & rent/return logic
-│   │   │       │   └── CustomUserDetailsService.java # Connects Security to DB
-│   │   │       └── VideoRentalApplication.java   # Main entry point
+│   │   │       │   ├── UserService.java
+│   │   │       │   ├── RentalService.java
+│   │   │       │   └── CustomUserDetailsService.java
+│   │   │       └── VideoRentalApplication.java
 │   │   └── resources/
-│   │       ├── application.properties            # DB & Server settings
-│   │       └── static/                           # (Optional) Static files
-│   └── test/                                     # Unit & Integration tests
-├── build.gradle                                  # Project dependencies
+│   │       ├── application.properties
+│   │       └── static/
+│   └── test/
+├── build.gradle
 └── README.md
 
 
