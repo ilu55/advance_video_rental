@@ -94,7 +94,11 @@ video-rental-system/
 ├── build.gradle
 └── README.md
 
+---
 
+## 🧠 Package Responsibilities
+
+```
 1. config/: Contains classes that define how the application is built—this is where you permit public access to Swagger and set the security chain to be Stateless.
 
 2. controller/: The "Gatekeepers" of your API. They accept the JSON from Postman/Curl and pass it to the service.
@@ -106,10 +110,10 @@ video-rental-system/
 5. security/: This is where the JWT magic happens. It intercepts every request to see if the user has a valid Bearer token.
 
 6. service/: This is where the 2-video rental limit is checked. Controllers call these methods to execute the actual "work."
-
+```
 
 ---
-
+```
 ## 🚀 API Endpoints
 
 ### 🔐 Authentication (Public)
@@ -129,7 +133,7 @@ video-rental-system/
 | POST  | `/api/videos`             | ADMIN       |
 | POST  | `/api/videos/{id}/rent`   | CUSTOMER    |
 | POST  | `/api/videos/{id}/return` | CUSTOMER    |
-
+```
 ---
 
 ## ⚙️ Setup & Installation
