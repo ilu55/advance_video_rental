@@ -93,7 +93,7 @@ video-rental-system/
 │   └── test/
 ├── build.gradle
 └── README.md
-
+```
 ---
 
 ## 🧠 Package Responsibilities
@@ -112,7 +112,7 @@ video-rental-system/
 6. service/: This is where the 2-video rental limit is checked. Controllers call these methods to execute the actual "work."
 ```
 
----
+
 ```
 ## 🚀 API Endpoints
 
@@ -123,7 +123,7 @@ video-rental-system/
 | POST  | `/api/register` | Register a new user      |
 | POST  | `/api/login`    | Authenticate and get JWT |
 
----
+ 
 
 ### 📽️ Videos & Rentals (Secured)
 
@@ -134,12 +134,14 @@ video-rental-system/
 | POST  | `/api/videos/{id}/rent`   | CUSTOMER    |
 | POST  | `/api/videos/{id}/return` | CUSTOMER    |
 ```
----
+
 
 ## ⚙️ Setup & Installation
 
 ### 1️⃣ Clone the Repository
+
 ```bash
+
 git clone https://github.com/ilu55/advance_video_rental.git
 cd advance_video_rental
 ```
