@@ -35,5 +35,5 @@ public class Video {
    
     @Column(nullable = false)
     @Builder.Default
-    private boolean isAvailable = true; // [cite: 23, 24]
+    private Boolean isAvailable = true; // [cite: 23, 24]
 }

@@ -4,6 +4,7 @@ import com.ilu55.videorental.dto.UserLoginDto;
 import com.ilu55.videorental.dto.UserRegistrationDto;
 import com.ilu55.videorental.entity.User;
 import com.ilu55.videorental.exception.EmailAlreadyExistsException;
+import com.ilu55.videorental.security.JwtService;
 import com.ilu55.videorental.service.UserService;
 
 import jakarta.validation.Valid;
@@ -13,15 +14,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindingResult;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+ 
 
 @RestController
 @RequestMapping("/api")
@@ -33,25 +35,80 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    /**
-     * Public endpoint for User Registration.
-     * Captures Email, Password, First Name, Last Name, and Role[cite: 18].
-     */
+    @Autowired
+    private JwtService jwtService;
+
+    // /**
+    //  * Public endpoint for User Registration.
+    //  * Captures Email, Password, First Name, Last Name, and Role[cite: 18].
+    //  */
+    // @PostMapping("/register")
+    // public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDto registrationDto, BindingResult bindingResult) {
+    //     if (bindingResult.hasErrors()) {
+    //         Map<String, String> errors = bindingResult.getFieldErrors()
+    //                 .stream()
+    //                 .collect(Collectors.toMap(org.springframework.validation.FieldError::getField, org.springframework.validation.FieldError::getDefaultMessage));
+    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    //     }
+
+    //     try {
+    //         User registeredUser = userService.registerUser(registrationDto);
+    //         if (registeredUser == null || registeredUser.getId() == null) {
+    //             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User registration failed");
+    //         }
+    //         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+    //     } catch (EmailAlreadyExistsException e) {
+    //         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    //     } catch (IllegalArgumentException e) {
+    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    //     } catch (DataIntegrityViolationException e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error: " + e.getMessage());
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+    //     }
+    // }
+
+    // /**
+    //  * Endpoint for Login. 
+    //  * Accessible via Basic Auth (Email and Password)[cite: 8, 20].
+    //  */
+    // @PostMapping("/login")
+    // public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDto loginDto, BindingResult bindingResult) {
+    //     if (bindingResult.hasErrors()) {
+    //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error",  "Email and Password are required"));
+    // }
+    //      try {
+    //     // 2. This replaces the header-based check. It looks up the user in DB and matches the password.
+    //     Authentication authentication = authenticationManager.authenticate(
+    //             new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
+    //     );
+    //     Map<String, String> response = new HashMap<>();
+    //     response.put("email", authentication.getName());
+    //     response.put("status", "Authenticated");
+    //     // Returns the roles assigned to the user [cite: 13]
+    //     response.put("roles", authentication.getAuthorities().toString());
+    //     return ResponseEntity.ok(response);
+    //     } catch (BadCredentialsException e) {
+    //     // 4. This triggers if email or password don't match the database
+    //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Invalid email or password"));
+    // }
+    // }
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDto registrationDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = bindingResult.getFieldErrors()
-                    .stream()
-                    .collect(Collectors.toMap(org.springframework.validation.FieldError::getField, org.springframework.validation.FieldError::getDefaultMessage));
+         if (bindingResult.hasErrors()) {
+            StringBuilder errorMessages = new StringBuilder();
+             bindingResult.getFieldErrors().forEach(error -> {
+                 errorMessages.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
+             });
+            
+            Map<String, String> errors =  new HashMap<>();
+            errors.put("errors" , errorMessages.toString());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
 
         try {
-            User registeredUser = userService.registerUser(registrationDto);
-            if (registeredUser == null || registeredUser.getId() == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User registration failed");
-            }
-            return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+           User registeredUser = userService.registerUser(registrationDto);
+        return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         } catch (EmailAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -61,31 +118,45 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
+    
+        
     }
 
     /**
-     * Endpoint for Login. 
-     * Accessible via Basic Auth (Email and Password)[cite: 8, 20].
+     * Public endpoint for login.
+     * Authenticates user and returns a stateless JWT token.
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDto loginDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto loginDto, BindingResult bindingResult) {
+                if (bindingResult.hasErrors()) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error",  "Email and Password are required"));
     }
-         try {
-        // 2. This replaces the header-based check. It looks up the user in DB and matches the password.
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
-        );
-        Map<String, String> response = new HashMap<>();
-        response.put("email", authentication.getName());
-        response.put("status", "Authenticated");
-        // Returns the roles assigned to the user [cite: 13]
-        response.put("roles", authentication.getAuthorities().toString());
-        return ResponseEntity.ok(response);
-        } catch (BadCredentialsException e) {
-        // 4. This triggers if email or password don't match the database
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Invalid email or password"));
-    }
+        try {
+            // 1. Authenticate using Spring Security's AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginDto.getEmail(), 
+                    loginDto.getPassword()
+                )
+            );
+
+            // 2. If successful, generate the JWT token
+            String token = jwtService.generateToken(authentication.getName());
+
+            // 3. Prepare response body
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            response.put("email", authentication.getName());
+            response.put("type", "Bearer");
+
+            return ResponseEntity.ok(response);
+
+        } catch (AuthenticationException e) {
+            // 4. Handle invalid credentials
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Unauthorized");
+            errorResponse.put("message", "Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
     }
 }

@@ -21,7 +21,7 @@ public class VideoService {
     // Only the ADMIN is allowed to create [cite: 26]
     public Video saveVideo(Video video) {
         // All videos are assumed available to rent by default [cite: 24]
-        video.setAvailable(true); 
+        video.setIsAvailable(true); 
         return videoRepository.save(video);
     }
 
@@ -33,7 +33,7 @@ public class VideoService {
         video.setTitle(videoDetails.getTitle());
         video.setDirector(videoDetails.getDirector());
         video.setGenre(videoDetails.getGenre());
-        video.setAvailable(videoDetails.isAvailable());
+        video.setIsAvailable(videoDetails.getIsAvailable());
 
         return videoRepository.save(video);
     }

@@ -1,11 +1,13 @@
 package com.ilu55.videorental.controller;
 
 import com.ilu55.videorental.entity.Video;
+import com.ilu55.videorental.service.RentalService;
 import com.ilu55.videorental.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -15,6 +17,9 @@ public class VideoController {
 
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private RentalService rentalService;
 
     /**
      * Browse the list of available videos.
@@ -54,5 +59,16 @@ public class VideoController {
     public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
         videoService.deleteVideo(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{videoId}/rent") // Rent endpoint [cite: 37]
+    public ResponseEntity<?> rent(@PathVariable Long videoId, Authentication auth) {
+        return ResponseEntity.ok(rentalService.rentVideo(auth.getName(), videoId));
+    }
+
+    @PostMapping("/{videoId}/return") // Return endpoint [cite: 38]
+    public ResponseEntity<?> returnVid(@PathVariable Long videoId, Authentication auth) {
+        rentalService.returnVideo(auth.getName(), videoId);
+        return ResponseEntity.ok("Returned successfully");
     }
 }

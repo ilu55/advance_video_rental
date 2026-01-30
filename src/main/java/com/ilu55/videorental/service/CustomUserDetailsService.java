@@ -2,7 +2,11 @@ package com.ilu55.videorental.service;
 
 import com.ilu55.videorental.entity.User;
 import com.ilu55.videorental.repository.UserRepository;
+
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,10 +23,16 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole())
-                .build();
+          
+        // return org.springframework.security.core.userdetails.User
+        //         .withUsername(user.getEmail())
+        //         .password(user.getPassword())
+        //         .roles(user.getRole())
+        //         .build();
+                return new org.springframework.security.core.userdetails.User(
+    user.getEmail(),
+    user.getPassword(),
+    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+);
     }
 }
